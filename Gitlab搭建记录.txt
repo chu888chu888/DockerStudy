@@ -1,0 +1,169 @@
+一 服务器初始化设置
+#apt-get update
+#apt-get upgrade
+#apt-get install mc htop iftop glances nano
+
+#更新hosts,加快平时的外网访问速度
+#http://levi.cg.am/archives/3553
+#替换/etc/hosts
+#替换ubuntu源
+#cp /etc/apt/sources.list /etc/apt/sources.lists.apt
+#nano /etc/apt/sources.list
+deb http://mirrors.aliyun.com/ubuntu/ trusty main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ trusty-security main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ trusty-updates main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ trusty-proposed main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ trusty-backports main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ trusty main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ trusty-security main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ trusty-updates main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ trusty-proposed main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ trusty-backports main restricted universe multiverse
+#设置固定IP
+#nano /etc/network/interfaces
+auto p5p1
+iface p5p1 inet static
+address 192.168.1.175
+netmask 255.255.255.0
+gateway 192.168.1.1
+
+#nano /etc/resolv.conf
+nameserver 223.5.5.5
+nameserver 223.6.6.6
+#nano /etc/resolvconf/resolv.conf.d/base
+nameserver 223.5.5.5
+nameserver 223.6.6.6
+
+
+#一个小插曲
+
+This message occurs when leaving the Grub menu and before the Ubuntu splash screen.
+
+How do I fix the problem to clear the message?
+
+And what doe is it mean?
+
+error:  Diskfilter writes are not supported
+System boots and seems to work just fine.
+
+
+I think this error occur because of raid or LVM partition .
+
+For a temporary fix for this problem :
+
+Edit :/etc/grub.d/10_linux
+
+Replace 'quick_boot="1"' with 'quick_boot="0"'
+
+Then :
+
+sudo update-grub
+
+二 安装Docker
+
+#which wget
+#wget -qO- https://get.docker.com/ | sh
+#sudo docker run hello-world
+#sudo usermod -aG docker ubuntu
+
+#sudo docker save -o ubuntu_14.04.tar ubuntu:14.04
+#sudo docker load <ubuntu_14.04.tar
+
+
+
+#docker run --name=postgresql-gitlab -d \
+  --env='DB_NAME=gitlabhq_production'\
+  --env='DB_USER=gitlab' --env='DB_PASS=password'\
+  --volume=/srv/docker/gitlab/postgresql:/var/lib/postgresql \
+  sameersbn/postgresql:9.4
+
+#docker run --name=redis-gitlab -d \
+  --volume=/srv/docker/gitlab/redis:/var/lib/redis \
+  sameersbn/redis:latest
+
+#!/bin/bash
+sudo docker run --name='gitlabwithmail' -d \
+  --link=postgresql-gitlab:postgresql --link=redis-gitlab:redisio \
+  --publish=10022:22 --publish=10080:80 \
+  --env='GITLAB_PORT=10080' --env='GITLAB_SSH_PORT=10022'\
+  --volume=/srv/docker/gitlab/gitlab:/home/git/data \
+  --env='SMTP_HOST=smtp.exmail.qq.com' --env='SMTP_PORT=465' \
+  --env='SMTP_USER=cgm@hithinksoft.com' --env='SMTP_PASS=chu2711632' \
+sameersbn/gitlab:7.11.4
+
+docker run --name=redmine -it --rm \
+  --env='SMTP_USER=USER@gmail.com' --env='SMTP_PASS=PASSWORD'\
+  --volume=/srv/docker/redmine/redmine:/home/redmine/data \
+  sameersbn/redmine:3.0.3-1
+
+
+
+
+NOTE: Please allow a couple of minutes for the GitLab application to start.
+
+Point your browser to http://localhost:10080 and login using the default username and password:
+
+username: root
+password: 5iveL!fe
+You should now have the GitLab application up and ready for testing. If you want to use this image in production the please read on.
+
+#为了保障服务可以在机器关闭后自动启动,需要加入rc.local中
+#f73f redis
+/usr/bin/docker start f73f
+#f6f7 postgresql
+/usr/bin/docker start f6f7
+
+#有一件非常重要的事情就是要注意启动顺序
+#先启动redis postgresql
+
+
+
+#Docker常用命令
+Docker常见命令
+容器相关操作
+docker create # 创建一个容器但是不启动它
+docker run # 创建并启动一个容器
+docker stop # 停止容器运行，发送信号SIGTERM
+docker start # 启动一个停止状态的容器
+docker restart # 重启一个容器
+docker rm # 删除一个容器
+docker kill # 发送信号给容器，默认SIGKILL
+docker attach # 连接(进入)到一个正在运行的容器
+docker wait # 阻塞到一个容器，直到容器停止运行
+获取容器相关信息
+docker ps # 显示状态为运行（Up）的容器
+docker ps -a # 显示所有容器,包括运行中（Up）的和退出的(Exited)
+docker inspect # 深入容器内部获取容器所有信息
+docker logs # 查看容器的日志(stdout/stderr)
+docker events # 得到docker服务器的实时的事件
+docker port # 显示容器的端口映射
+docker top # 显示容器的进程信息
+docker diff # 显示容器文件系统的前后变化
+导出容器
+docker cp # 从容器里向外拷贝文件或目录
+docker export # 将容器整个文件系统导出为一个tar包，不带layers、tag等信息
+执行
+docker exec # 在容器里执行一个命令，可以执行bash进入交互式
+镜像操作
+docker images # 显示本地所有的镜像列表
+docker import # 从一个tar包创建一个镜像，往往和export结合使用
+docker build # 使用Dockerfile创建镜像（推荐）
+docker commit # 从容器创建镜像
+docker rmi # 删除一个镜像
+docker load # 从一个tar包创建一个镜像，和save配合使用
+docker save # 将一个镜像保存为一个tar包，带layers和tag信息
+docker history # 显示生成一个镜像的历史命令
+docker tag # 为镜像起一个别名
+镜像仓库(registry)操作
+docker login # 登录到一个registry
+docker search # 从registry仓库搜索镜像
+docker pull # 从仓库下载镜像到本地
+docker push # 将一个镜像push到registry仓库中
+杀掉所有正在运行的容器
+docker kill $(docker ps -q)
+删除老的(一周前创建)容器
+docker ps -a | grep 'weeks ago' | awk '{print $1}' | xargs docker rm
+删除已经停止的容器
+docker rm `docker ps -a -q`
+删除所有镜像，小心
+docker rmi $(docker images -q)
