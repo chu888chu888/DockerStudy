@@ -1,11 +1,25 @@
-# VERSION 0.0.1
-# 默认ubuntu server长期支持版本，当前是14.04
-​FROM sameersbn/ubuntu:14.04.20150613
-# 签名啦
+FROM sameersbn/ubuntu:14.04.20150613
 MAINTAINER chu888chu888 "chu888chu888@gmail.com"
 
 # 更新源，安装ssh server
-RUN echo "deb http://archive.ubuntu.com/ubuntu precise main universe"> /etc/apt/sources.list
+
+RUN echo "deb http://archive.ubuntu.com/ubuntu/ trusty main restricted"> /etc/apt/sources.list
+RUN echo "deb-src http://archive.ubuntu.com/ubuntu/ trusty main restricted">> /etc/apt/sources.list
+RUN echo "deb http://archive.ubuntu.com/ubuntu/ trusty-updates main restricted">> /etc/apt/sources.list
+RUN echo "deb-src http://archive.ubuntu.com/ubuntu/ trusty-updates main restricted">> /etc/apt/sources.list
+
+RUN echo "deb http://archive.ubuntu.com/ubuntu/ trusty universe">> /etc/apt/sources.list
+RUN echo "deb-src http://archive.ubuntu.com/ubuntu/ trusty universe">> /etc/apt/sources.list
+RUN echo "deb http://archive.ubuntu.com/ubuntu/ trusty-updates universe">> /etc/apt/sources.list
+RUN echo "deb-src http://archive.ubuntu.com/ubuntu/ trusty-updates universe">> /etc/apt/sources.list
+
+
+RUN echo "deb http://archive.ubuntu.com/ubuntu/ trusty-security main restricted">> /etc/apt/sources.list
+RUN echo "deb-src http://archive.ubuntu.com/ubuntu/ trusty-security main restricted">> /etc/apt/sources.list
+RUN echo "deb http://archive.ubuntu.com/ubuntu/ trusty-security universe">> /etc/apt/sources.list
+RUN echo "deb-src http://archive.ubuntu.com/ubuntu/ trusty-security universe">> /etc/apt/sources.list
+
+
 RUN apt-get update
 RUN apt-get install -y openssh-server
 RUN mkdir -p /var/run/sshd
@@ -14,10 +28,11 @@ RUN mkdir -p /var/run/sshd
 RUN echo "root:123456" | chpasswd 
 
 # 添加orache java7源，一次性安装vim，wget，curl，java7，tomcat7等必备软件
-RUN apt-get install python-software-properties
+RUN apt-get install -y python-software-properties
+RUN apt-get update
 RUN add-apt-repository ppa:webupd8team/java
 RUN apt-get update
-RUN apt-get install -y vim wget curl oracle-java7-installer tomcat7
+RUN apt-get install -y vim nano htop mc wget git curl oracle-java7-installer tomcat7
 
 # 设置JAVA_HOME环境变量
 RUN update-alternatives --display java
