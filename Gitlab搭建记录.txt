@@ -167,3 +167,9 @@ docker ps -a | grep 'weeks ago' | awk '{print $1}' | xargs docker rm
 docker rm `docker ps -a -q`
 删除所有镜像，小心
 docker rmi $(docker images -q)
+
+备份数据
+sudo docker save -o redmine3.0.3-1.tar sameersbn/redmine:3.0.3-1
+
+导入镜像
+sudo docker load <gitlab.7.11.4.tar
